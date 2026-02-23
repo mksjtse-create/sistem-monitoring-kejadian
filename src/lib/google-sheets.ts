@@ -60,10 +60,17 @@ export const COLUMN_HEADERS = [
 
 // Get authenticated client with both Sheets and Drive scopes
 async function getAuthClient() {
+  let privateKey = process.env.GOOGLE_PRIVATE_KEY || '';
+  
+  // Handle escaped newlines
+  if (privateKey.includes('\\n')) {
+    privateKey = privateKey.replace(/\\n/g, '\n');
+  }
+  
   const auth = new google.auth.GoogleAuth({
     credentials: {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      private_key: privateKey,
     },
     scopes: [
       'https://www.googleapis.com/auth/spreadsheets',
@@ -210,6 +217,9 @@ export async function addKejadianRow(data: Record<string, string | number>) {
     // Add timestamp at the beginning
     row[0] = new Date().toISOString();
     
+    console.log('Adding row to sheet:', sheetName);
+    console.log('Row data:', row);
+    
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
       range: `${sheetName}!A:AD`,
@@ -289,12 +299,7 @@ export async function deleteKejadianRow(rowId: number) {
     }
     
     // rowId is 1-based (1 = first data row)
-    // In Google Sheets: Row 1 = header, Row 2 = first data row
-    // deleteDimension uses 0-based index, so:
-    // - To delete Row 2 (first data), startIndex = 1
-    // - If rowId = 1, startIndex should be 1 (rowId)
-    // - If rowId = 2, startIndex should be 2 (rowId)
-    const startIndex = rowId; // rowId is already the correct 0-based sheet row index for deletion
+    const startIndex = rowId;
     
     console.log('Deleting row with sheetId:', sheetId, 'rowId:', rowId, 'startIndex:', startIndex);
     
