@@ -24,7 +24,7 @@ export function isGoogleConfigured(): boolean {
   return isConfigured;
 }
 
-// Column headers for Input_Kejadian sheet
+// Column headers for Input_Kejadian sheet (must match Google Sheet exactly)
 export const COLUMN_HEADERS = [
   'Timestamp',
   'Tanggal Kejadian',
